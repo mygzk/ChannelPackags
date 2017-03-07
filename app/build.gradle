@@ -10,17 +10,76 @@ android {
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true //突破应用方法65535限制
+        manifestPlaceholders = [UMENG_CHANNEL_VALUE:"umeng"]
+
     }
+
+   /*signingConfigs{
+       debug{
+
+       }
+
+       release{
+
+       }
+   }*/
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled false //混淆
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            //指定apk名称
+            applicationVariants.all{variant ->
+                variant.outputs.each{output ->
+                    def outfile = output.outputFile
+                    if(outfile!=null&&outfile.name.endsWith(".apk")){
+                        def fileName = "${variant.productFlavors[0].name}"+".apk"
+                        output.outputFile = new File(outfile.parent,fileName)
+                    }
+
+                }
+
+            }
+
         }
     }
+
+    //方式一
+    /*productFlavors{
+
+        xiaomi{
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE:"xiaomi"]
+        }
+
+        wandoujia{
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE:"wandoujia"]
+        }
+    }*/
+
+    //方式二 star
+    productFlavors{
+
+        xiaomi{
+            //manifestPlaceholders = [UMENG_CHANNEL:"xiaomi"]
+        }
+
+        wandoujia{
+           // manifestPlaceholders = [UMENG_CHANNEL:"wandoujia"]
+        }
+    }
+    productFlavors.all{
+        flavor ->flavor.manifestPlaceholders=[UMENG_CHANNEL_VALUE:name]
+    }
+
+    //方式二 end
+
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:25.2.0'
+    //umeng 统计
+    compile 'com.umeng.analytics:analytics:latest.integration'
 }
